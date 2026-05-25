@@ -69,7 +69,10 @@ snapshot[`Qobuz provider > release lookup > single by two artists 1`] = `
       externalIds: [
         {
           id: "6464867",
+          language: "en",
           provider: "qobuz",
+          region: "US",
+          slug: "honeycomb-records-4",
           type: "label",
         },
       ],
@@ -217,6 +220,7 @@ snapshot[`Qobuz provider > release lookup > non-downloadable album 1`] = `
         {
           id: "7642777",
           provider: "qobuz",
+          slug: "nbcuniversal-entertainment-1",
           type: "label",
         },
       ],
