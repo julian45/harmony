@@ -10,6 +10,8 @@ export const scriptCodes = [
 	'Hebr',
 	'Arab',
 	'Thai',
+	// Rare scripts, added upon request:
+	'Khmr',
 ] as const;
 
 /** ISO 15924 script codes which are defined as Unicode character classes. */
