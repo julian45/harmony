@@ -66,10 +66,10 @@ export default class QobuzProvider extends MetadataApiProvider {
 	readonly apiBaseUrl = 'https://www.qobuz.com/api.json/0.2/';
 
 	constructUrl(entity: EntityId): URL {
+		let { type, region, slug } = entity;
 		// Prefer the more reliable, localized www.qobuz.com URL if we know the region.
-		if (entity.region) {
-			const locale = makeQobuzLocale(entity.region, entity.language);
-			let { type, slug } = entity;
+		if (region && type !== 'track') {
+			const locale = makeQobuzLocale(region, entity.language);
 			if (type === 'artist') {
 				// For some reason www.qobuz.com artist URLs are invalid.
 				type = 'interpreter';

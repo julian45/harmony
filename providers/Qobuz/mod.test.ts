@@ -3,7 +3,7 @@ import type { ReleaseOptions } from '@/harmonizer/types.ts';
 import { describeProvider, makeProviderOptions } from '@/providers/test_spec.ts';
 import { stubProviderLookups } from '@/providers/test_stubs.ts';
 import { assert } from 'std/assert/assert.ts';
-import { afterAll, describe } from '@std/testing/bdd';
+import { afterAll, describe, it } from '@std/testing/bdd';
 import { assertSnapshot } from '@std/testing/snapshot';
 
 import QobuzProvider from './mod.ts';
@@ -109,6 +109,24 @@ describe('Qobuz provider', () => {
 				);
 			},
 		}],
+	});
+
+	it('QobuzProvider.constructUrl does not create invalid URLs', () => {
+		assertEquals(
+			qobuz.constructUrl({ type: 'artist', id: '28025284', region: 'DE' }).href,
+			'https://www.qobuz.com/de-de/interpreter/-/28025284',
+			'Localized www artist URLs use the entity type "interpreter"',
+		);
+		assertEquals(
+			qobuz.constructUrl({ type: 'track', id: '285222652', region: 'US' }).href,
+			'https://open.qobuz.com/track/285222652',
+			'Region should be ignored for track, www track URLs are generally invalid',
+		);
+		assertEquals(
+			qobuz.constructUrl({ type: 'label', id: '97377', region: 'FR' }).href,
+			'https://play.qobuz.com/label/97377',
+			'Region should be ignored for label without slug, URL would be invalid',
+		);
 	});
 
 	afterAll(() => {
