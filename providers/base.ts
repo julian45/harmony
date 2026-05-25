@@ -1,7 +1,9 @@
 import { FeatureQuality, type FeatureQualityMap, type ProviderFeature } from './features.ts';
 import { CacheMissError, LookupError, ProviderError, ResponseError } from '@/utils/errors.ts';
 import { pluralWithCount } from '@/utils/plural.ts';
+import { isDefined } from '@/utils/predicate.ts';
 import { delay } from 'std/async/delay.ts';
+import { filterValues } from '@std/collections/filter-values';
 import { getLogger } from 'std/log/get_logger.ts';
 import { rateLimit } from 'utils/async/rateLimit.js';
 import { simplifyName } from 'utils/string/simplify.js';
@@ -200,7 +202,11 @@ export abstract class MetadataProvider {
 
 	/** Creates external entity IDs from the given provider-specific IDs. */
 	makeExternalIds(...entityIds: Array<EntityId | ExternalEntityId>): ExternalEntityId[] {
-		return entityIds.map((entityId) => ({ ...entityId, provider: this.internalName }));
+		return entityIds.map((entityId) => {
+			// @ts-ignore-error -- `EntityId` is a valid `Record`
+			entityId = filterValues(entityId, isDefined);
+			return { ...entityId, provider: this.internalName };
+		});
 	}
 
 	/** Creates external entity IDs from the given provider entity URL. */
@@ -373,6 +379,9 @@ export abstract class ReleaseLookup<Provider extends MetadataProvider, RawReleas
 			if (entity.region) {
 				this.lookup.region = entity.region;
 				this.options.regions = new Set([entity.region]);
+			}
+			if (entity.language) {
+				this.lookup.language = entity.language;
 			}
 		} else if (typeof specifier === 'string') {
 			this.lookup = { method: 'id', value: specifier };
