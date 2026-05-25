@@ -23,7 +23,7 @@ import type {
 	QobuzPartialTrack,
 	QobuzSearchResponse,
 } from './api_types.ts';
-import { makeLocale } from './regions.ts';
+import { availableRegionsAndLanguages, makeQobuzLocale } from './regions.ts';
 import { ResponseError as SnapResponseError } from 'snap-storage';
 
 const qobuzAppId = getFromEnv('HARMONY_QOBUZ_APP_ID') || '';
@@ -53,6 +53,8 @@ export default class QobuzProvider extends MetadataApiProvider {
 		label: 'label',
 	};
 
+	override readonly availableRegions = new Set(Object.keys(availableRegionsAndLanguages));
+
 	readonly releaseLookup = QobuzReleaseLookup;
 
 	override readonly launchDate: PartialDate = {
@@ -66,7 +68,7 @@ export default class QobuzProvider extends MetadataApiProvider {
 	constructUrl(entity: EntityId): URL {
 		// Prefer the more reliable, localized www.qobuz.com URL if we know the region.
 		if (entity.region) {
-			const locale = makeLocale(entity.region, entity.language);
+			const locale = makeQobuzLocale(entity.region, entity.language);
 			let { type, slug } = entity;
 			if (type === 'artist') {
 				// For some reason www.qobuz.com artist URLs are invalid.
@@ -76,11 +78,11 @@ export default class QobuzProvider extends MetadataApiProvider {
 				// Use a placeholder slug, except for labels which would become invalid.
 				slug = '-';
 			}
-			if (slug) {
+			if (locale && slug) {
 				if (type === 'label') {
 					slug += '/download-streaming-albums';
 				}
-				return new URL([locale, type, slug ?? '-', entity.id].join('/'), 'https://www.qobuz.com');
+				return new URL([locale, type, slug, entity.id].join('/'), 'https://www.qobuz.com');
 			}
 		}
 		// Fallback to open.qobuz.com URL without region and slug.
@@ -180,6 +182,16 @@ export class QobuzReleaseLookup extends ReleaseApiLookup<QobuzProvider, QobuzAlb
 			snapshotMaxTimestamp: this.options.snapshotMaxTimestamp,
 		});
 		this.updateCacheTime(timestamp);
+
+		// If the lookup region is not known (through the release URL), try to find a valid region in the options.
+		if (!this.lookup.region && this.options.regions) {
+			for (const region of this.options.regions) {
+				if (makeQobuzLocale(region)) {
+					this.lookup.region = region;
+					break;
+				}
+			}
+		}
 
 		return release;
 	}

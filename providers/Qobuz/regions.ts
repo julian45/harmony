@@ -64,10 +64,14 @@ export const availableRegionsAndLanguages: Record<CountryCode, LanguageCode[] | 
  * Constructs a Qobuz URL locale from the given region and language.
  *
  * If no language is given, a default language for the region is used.
+ *
+ * @returns A valid locale or `undefined` if Qobuz is not available in the given region.
  */
-export function makeLocale(region: CountryCode, language?: LanguageCode): string {
+export function makeQobuzLocale(region: CountryCode, language?: LanguageCode): string | undefined {
 	if (!language) {
 		language = availableRegionsAndLanguages[region.toUpperCase()]?.[0];
 	}
-	return [region.toLowerCase(), language ?? 'en'].join('-');
+	if (language) {
+		return [region.toLowerCase(), language].join('-');
+	}
 }
