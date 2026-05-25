@@ -1,5 +1,6 @@
 import { capitalizeReleaseType } from '@/harmonizer/release_types.ts';
 import { type ApiQueryOptions, type CacheEntry, MetadataApiProvider, ReleaseApiLookup } from '@/providers/base.ts';
+import type { ProviderCategory } from '@/providers/categories.ts';
 import { DurationPrecision, FeatureQuality, FeatureQualityMap } from '@/providers/features.ts';
 import { getFromEnv } from '@/utils/config.ts';
 import { parseHyphenatedDate, PartialDate } from '@/utils/date.ts';
@@ -36,6 +37,8 @@ export default class QobuzProvider extends MetadataApiProvider {
 		pathname:
 			'/:region(\\w{2}-\\w{2})?/:type(artist|album|track|interpreter|label)/:slug?{/download-streaming-albums}?/:id',
 	});
+
+	override readonly categories = new Set<ProviderCategory>(['digital']);
 
 	override readonly features: FeatureQualityMap = {
 		'cover size': 3000,
