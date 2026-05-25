@@ -229,7 +229,15 @@ export class QobuzReleaseLookup extends ReleaseApiLookup<QobuzProvider, QobuzAlb
 			images: this.getAlbumImage(rawRelease.image.small),
 			labels: [{
 				name: rawRelease.label.name,
-				externalIds: this.provider.makeExternalIds({ type: 'label', id: String(rawRelease.label.id) }),
+				externalIds: this.provider.makeExternalIds({
+					type: 'label',
+					id: String(rawRelease.label.id),
+					slug: rawRelease.label.slug,
+					// Prefer localized www URL as play.qobuz.com label URLs are only available for logged in users.
+					// Infer label locale from release as there is no better source.
+					region: this.lookup.region,
+					language: this.lookup.language,
+				}),
 			}],
 			externalLinks: [{
 				url: this.provider.constructUrl(this.entity).toString(),
